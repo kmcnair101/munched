@@ -1,262 +1,149 @@
 "use client";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./page.module.css";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   GoogleMap,
   useLoadScript,
   Marker,
+  InfoWindow,
   OverlayView,
 } from "@react-google-maps/api";
+import axios from "axios";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import { Carousel } from "react-responsive-carousel";
 
-const restaurants = [
+const restaurantsData = [
   {
-    name: "Le Chick Miami",
-    address: "310 NW 24th St, Miami, FL 33127",
-    lat: 25.800145,
-    lng: -80.199688,
-    rating: 4.5,
-    priceLevel: 2,
-    reward: 10,
+    name: "Momosan Wynwood",
+    place_id: "ChIJI8aonrm32YgRNQ2cXg9k_fk",
+    cuisine: "Japanese",
   },
   {
-    name: "Coyo Taco",
-    address: "251 NW 23rd St, Miami, FL 33127",
-    lat: 25.800145,
-    lng: -80.199688,
-    rating: 4.5,
-    priceLevel: 2,
-    reward: 12,
+    name: "Cerveceria La Tropical",
+    place_id: "ChIJX772nXW32YgRqL-0pvjFPYY",
+    cuisine: "Cuban",
   },
   {
-    name: "Azul Latin Kitchen",
-    address: "1300 Biscayne Blvd, Miami, FL 33132",
-    lat: 25.788551,
-    lng: -80.189014,
-    rating: 4.5,
-    priceLevel: 3,
-    reward: 14,
+    name: "R House Wynwood",
+    place_id: "ChIJqefzYK222YgRNDCblbPPVVU",
+    cuisine: "Contemporary Latin",
   },
   {
-    name: "Sushi Maki",
-    address: "325 NW 23rd St, Miami, FL 33127",
-    lat: 25.800266,
-    lng: -80.199393,
-    rating: 4.5,
-    priceLevel: 2,
-    reward: 11,
+    name: "La Tiendita Taqueria",
+    place_id: "ChIJ95niEx632YgRzw1w0z6Ioyc",
+    cuisine: "Mexican",
   },
   {
-    name: "The Butcher Shop",
-    address: "221 NW 23rd St, Miami, FL 33127",
-    lat: 25.799971,
-    lng: -80.199705,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 13,
+    name: "STK Steakhouse",
+    place_id: "ChIJaXDYCGKz2YgRqb5MFh9gVf0",
+    cuisine: "Steakhouse",
   },
   {
-    name: "The Wynwood Yard",
-    address: "56 NW 23rd St, Miami, FL 33127",
-    lat: 25.799714,
-    lng: -80.200355,
-    rating: 4.5,
-    priceLevel: 2,
-    reward: 10,
+    name: "Amara at Paraiso",
+    place_id: "ChIJ7-kC5C6y2YgR8kFGy8pYlsM",
+    cuisine: "Contemporary American",
   },
   {
-    name: "Kiki's Chicken & Waffles",
-    address: "2901 NW 7th Ave, Miami, FL 33127",
-    lat: 25.802593,
-    lng: -80.201633,
-    rating: 4.5,
-    priceLevel: 2,
-    reward: 12,
+    name: "Michael's Genuine",
+    place_id: "ChIJfRgILlex2YgRvDRFonWLC4w",
+    cuisine: "Contemporary American",
   },
   {
-    name: "Sweet Liberty Drinks & Supply Co.",
-    address: "260 NW 24th St, Miami, FL 33127",
-    lat: 25.800082,
-    lng: -80.199344,
-    rating: 4.5,
-    priceLevel: 2,
-    reward: 11,
+    name: "SUGARCANE raw bar grill",
+    place_id: "ChIJMUpdgFOx2YgROjWhMQZMBRk",
+    cuisine: "Seafood",
   },
   {
-    name: "The Salty Donut",
-    address: "350 NW 23rd St, Miami, FL 33127",
-    lat: 25.799622,
-    lng: -80.200725,
-    rating: 4.5,
-    priceLevel: 1,
-    reward: 10,
+    name: "Sofia - Design District",
+    place_id: "ChIJAQBA3lax2YgRB7AIAB_GK_E",
+    cuisine: "Modern European",
   },
   {
-    name: "Michael's Genuine Food & Drink",
-    address: "1300 Brickell Ave, Miami, FL 33131",
-    lat: 25.760612,
-    lng: -80.191223,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 15,
+    name: "Moxies Miami Restaurant",
+    place_id: "ChIJ4yC24GK32YgRAEsm4jvWV30",
+    cuisine: "American",
   },
   {
-    name: "Lilia",
-    address: "1100 SW 1st Ave, Miami, FL 33130",
-    lat: 25.772897,
-    lng: -80.195086,
-    rating: 4.5,
-    priceLevel: 3,
-    reward: 14,
-  },
-  {
-    name: "The Bazaar by José Andrés",
-    address: "1101 SW 1st Ave, Miami, FL 33130",
-    lat: 25.772921,
-    lng: -80.195109,
-    rating: 4.5,
-    priceLevel: 5,
-    reward: 13,
-  },
-  {
-    name: "Mignonette",
-    address: "1100 SW 1st Ave, Miami, FL 33130",
-    lat: 25.772945,
-    lng: -80.195132,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 12,
-  },
-  {
-    name: "O-Ku",
-    address: "1100 SW 1st Ave, Miami, FL 33130",
-    lat: 25.772969,
-    lng: -80.195155,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 11,
-  },
-  {
-    name: "Ember",
-    address: "1100 SW 1st Ave, Miami, FL 33130",
-    lat: 25.772993,
-    lng: -80.195178,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 10,
+    name: "Dolce Italian",
+    place_id: "ChIJazj3FJu02YgREmLOfWg0kG8",
+    cuisine: "Italian",
   },
   {
     name: "The River Oyster Bar",
-    address: "888 Brickell Ave, Miami, FL 33131",
-    lat: 25.772742,
-    lng: -80.195022,
-    rating: 4.5,
-    priceLevel: 3,
-    reward: 12,
+    place_id: "ChIJX7AIlpC22YgR-faru5-AMpM",
+    cuisine: "Seafood",
   },
   {
-    name: "The Capital Grille",
-    address: "888 Brickell Ave, Miami, FL 33131",
-    lat: 25.772766,
-    lng: -80.195045,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 11,
+    name: "Boulud Sud Miami",
+    place_id: "ChIJKc4o84ux2YgRwV9hXejE_6w",
+    cuisine: "Mediterranean",
+  },
+  {
+    name: "The Bazaar by José Andrés",
+    place_id: "ChIJGV4vnJu02YgRRPZ2RRlUZbQ",
+    cuisine: "Spanish",
   },
   {
     name: "Novecento",
-    address: "888 Brickell Ave, Miami, FL 33131",
-    lat: 25.77279,
-    lng: -80.195068,
-    rating: 4.5,
-    priceLevel: 3,
-    reward: 10,
+    place_id: "ChIJEWuAKIG22YgRPOEUG7BlFsQ",
+    cuisine: "Italian",
   },
   {
-    name: "Joe's Stone Crab Restaurant",
-    address: "11 Washington Ave, Miami Beach, FL 33139",
-    lat: 25.768126,
-    lng: -80.193878,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 15,
+    name: "The Capital Grille",
+    place_id: "ChIJKVAQIZ222YgRxqIAgjmhNz8",
+    cuisine: "Steakhouse",
   },
   {
-    name: "Cafe Prima Pasta",
-    address: "1114 Ocean Dr, Miami Beach, FL 33139",
-    lat: 25.78217,
-    lng: -80.131745,
-    rating: 4.5,
-    priceLevel: 3,
-    reward: 14,
+    name: "Motek",
+    place_id: "ChIJtQCVt7G32YgR3aHrmstwrrk",
+    cuisine: "Mediterranean",
   },
   {
-    name: "The Strand at Carillon Miami, The",
-    address: "600 Ocean Dr, Miami Beach, FL 33139",
-    lat: 25.775752,
-    lng: -80.1313,
-    rating: 4.5,
-    priceLevel: 5,
-    reward: 13,
+    name: "Crazy About You",
+    place_id: "ChIJ56WSjYG22YgRV8CLvPG3z9E",
+    cuisine: "American",
   },
   {
-    name: "Estiatorio Milos",
-    address: "100 Ocean Dr, Miami Beach, FL 33139",
-    lat: 25.770968,
-    lng: -80.132853,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 12,
+    name: "Sexy Fish Miami",
+    place_id: "ChIJdfkR4PC32YgRgxEP4swq1oY",
+    cuisine: "Asian fusion",
   },
   {
-    name: "27 Restaurant and Bar",
-    address: "2727 Collins Ave, Miami Beach, FL 33139",
-    lat: 25.808137,
-    lng: -80.123723,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 11,
+    name: "Dalia",
+    place_id: "ChIJa1junq-12YgRqZ1aHTFcywE",
+    cuisine: "Mediterranean",
   },
   {
-    name: "StripSteak by Michael Mina",
-    address: "400 Ocean Dr, Miami Beach, FL 33139",
-    lat: 25.777757,
-    lng: -80.132132,
-    rating: 4.5,
-    priceLevel: 5,
-    reward: 10,
+    name: "Tequiztlan",
+    place_id: "ChIJtcEOCX602YgRQnCABa-D1gc",
+    cuisine: "Mexican",
   },
   {
-    name: "Jaya, at The Setai",
-    address: "2001 Collins Ave, Miami Beach, FL 33139",
-    lat: 25.791012,
-    lng: -80.128416,
-    rating: 4.5,
-    priceLevel: 5,
-    reward: 12,
-  },
-  {
-    name: "Los Fuegos at Faena Miami Beach",
-    address: "3201 Collins Ave, Miami Beach, FL 33139",
-    lat: 25.80985,
-    lng: -80.123079,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 11,
-  },
-  {
-    name: "Matador Room",
-    address: "900 Ocean Dr, Miami Beach, FL 33139",
-    lat: 25.7798,
-    lng: -80.13192,
-    rating: 4.5,
-    priceLevel: 4,
-    reward: 10,
+    name: "Playa Miami",
+    place_id: "ChIJFblNZYa02YgR1QY7Ux8Ki7w",
+    cuisine: "Mediterranean",
   },
 ];
 
 const Home = () => {
   const [selected, setSelected] = useState(null);
+  const [restaurants, setRestaurants] = useState([]);
+
+  useEffect(() => {
+    const fetchRestaurantData = async () => {
+      const results = await Promise.all(
+        restaurantsData.map((restaurant) =>
+          axios.get(`/api/placeDetails?place_id=${restaurant.place_id}`)
+        )
+      );
+      console.log(results);
+      const data = results.map((result) => result.data.result);
+      setRestaurants(data);
+    };
+
+    fetchRestaurantData();
+  }, []);
 
   const options = useMemo(
     () => ({
@@ -289,29 +176,52 @@ const Home = () => {
         {restaurants.map((restaurant) => (
           <OverlayView
             key={uuidv4()}
-            position={{ lat: restaurant.lat, lng: restaurant.lng }}
+            position={{
+              lat: restaurant.geometry.location.lat,
+              lng: restaurant.geometry.location.lng,
+            }}
             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
             getPixelPositionOffset={getPixelPositionOffset}
           >
-            <Marker
-              position={{ lat: restaurant.lat, lng: restaurant.lng }}
-              onClick={() => {
-                setSelected(restaurant);
-              }}
-            />
+            <>
+              <div className={styles.markerLabel}>{restaurant.name}</div>
+              <Marker
+                position={{
+                  lat: restaurant.geometry.location.lat,
+                  lng: restaurant.geometry.location.lng,
+                }}
+                onClick={() => {
+                  setSelected(restaurant);
+                }}
+              />
+            </>
           </OverlayView>
         ))}
 
         {selected ? (
           <InfoWindow
-            position={{ lat: selected.lat, lng: selected.lng }}
+            position={{
+              lat: selected.geometry.location.lat,
+              lng: selected.geometry.location.lng,
+            }}
             onCloseClick={() => {
               setSelected(null);
             }}
           >
             <div>
               <h2>{selected.name}</h2>
-              <p>{selected.address}</p>
+              <p>Price level: {selected.price_level}</p>
+              <p>Rating: {selected.rating}</p>
+              <Carousel>
+                {selected.photos?.map((photo, index) => (
+                  <div key={index}>
+                    <img
+                      src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+                      alt="Restaurant"
+                    />
+                  </div>
+                ))}
+              </Carousel>
             </div>
           </InfoWindow>
         ) : null}
