@@ -11,6 +11,9 @@ import axios from "axios";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import Link from "next/link";
+import SignUpForm from "../components/SignUpForm";
+import SignInForm from "../components/SignInForm";
+import { auth } from "../firebase";
 
 const restaurantsData = [
   {
@@ -150,6 +153,9 @@ const restaurantsData = [
 const Home = () => {
   const [selected, setSelected] = useState(null);
   const [restaurants, setRestaurants] = useState([]);
+  const [showSignUp, setShowSignUp] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchRestaurantData = async () => {
@@ -158,12 +164,19 @@ const Home = () => {
           axios.get(`/api/placeDetails?place_id=${restaurant.place_id}`)
         )
       );
-      console.log(results);
       const data = results.map((result) => result.data.result);
       setRestaurants(data);
     };
 
     fetchRestaurantData();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const options = useMemo(
@@ -186,12 +199,31 @@ const Home = () => {
     y: -(height / 2),
   });
 
+  const handleSignUpClick = () => {
+    setShowSignUp(true);
+  };
+
+  const handleSignInClick = () => {
+    setShowSignIn(true);
+  };
+
+  const handleSignUpClose = () => {
+    setShowSignUp(false);
+  };
+
+  const handleSignInClose = () => {
+    setShowSignIn(false);
+  };
+
   return (
     <div>
       <GoogleMap
         zoom={12}
         center={{ lat: 25.76, lng: -80.191788 }}
-        mapContainerClassName="map-container"
+        mapContainerStyle={{
+          width: "100%",
+          height: "100vh",
+        }}
         options={options}
       >
         {restaurants.map((restaurant, i) => (
@@ -216,18 +248,19 @@ const Home = () => {
                 }}
                 icon={{
                   url: `data:image/svg+xml;utf-8, 
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35">
-                <circle cx="17.5" cy="17.5" r="15" fill="%23FF0000"/>
-                <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="12px" dy=".3em">
-                  ${restaurantsData[i].points}%
-                </text>
-              </svg>`,
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35">
+                    <circle cx="17.5" cy="17.5" r="15" fill="%23FF0000"/>
+                    <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="12px" dy=".3em">
+                      ${restaurantsData[i].points}%
+                    </text>
+                  </svg>`,
                   scaledSize: new window.google.maps.Size(35, 35),
                 }}
               />
             </>
           </OverlayView>
         ))}
+
         {selected && (
           <Link href={`/restaurants/${selected.place_id}`} passHref>
             <InfoWindow
@@ -256,6 +289,35 @@ const Home = () => {
               </div>
             </InfoWindow>
           </Link>
+        )}
+
+        {!user && (
+          <>
+            {showSignUp && (
+              <OverlayView
+                position={{ lat: 25.76, lng: -80.191788 }}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                getPixelPositionOffset={getPixelPositionOffset}
+              >
+                <SignUpForm onClose={handleSignUpClose} />
+              </OverlayView>
+            )}
+
+            {showSignIn && (
+              <OverlayView
+                position={{ lat: 25.76, lng: -80.191788 }}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                getPixelPositionOffset={getPixelPositionOffset}
+              >
+                <SignInForm onClose={handleSignInClose} />
+              </OverlayView>
+            )}
+
+            <div className="overlay-buttons">
+              <button onClick={handleSignUpClick}>Sign Up</button>
+              <button onClick={handleSignInClick}>Sign In</button>
+            </div>
+          </>
         )}
       </GoogleMap>
     </div>

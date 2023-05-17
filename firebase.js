@@ -1,15 +1,15 @@
-"use client";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
+import "firebase/compat/auth";
 
 var firebaseConfig = {
-  apiKey: "AIzaSyAgMF6YMa7z12HfzZ6qIy3cUuTyzigcD6M",
-  authDomain: "munched-43b6d.firebaseapp.com",
-  projectId: "munched-43b6d",
-  storageBucket: "munched-43b6d.appspot.com",
-  messagingSenderId: "232470103712",
-  appId: "1:232470103712:web:5240f719f2a8dea3412bc5",
-  measurementId: "G-Z8KVKCD1Z7",
+  apiKey: "your-api-key",
+  authDomain: "your-auth-domain",
+  projectId: "your-project-id",
+  storageBucket: "your-storage-bucket",
+  messagingSenderId: "your-messaging-sender-id",
+  appId: "your-app-id",
+  measurementId: "your-measurement-id",
 };
 
 if (!firebase.apps.length) {
@@ -19,3 +19,4 @@ if (!firebase.apps.length) {
 }
 
 export const db = firebase.firestore();
+export const auth = firebase.auth();
