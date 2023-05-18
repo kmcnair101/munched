@@ -1,34 +1,71 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Restaurant Reservation System
 
-## Getting Started
+This is a web application that allows users to make and manage reservations for restaurants.
+Features
 
-First, run the development server:
+    View a list of reservations
+    Create a new reservation
+    Edit existing reservations
+    Delete reservations
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+Technologies Used
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    React
+    Firebase (Firestore, Authentication)
+    Google Maps API
+    axios
+    react-responsive-carousel
+    Next.js
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+API Reference
+Get all reservations
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+http
 
-## Learn More
+GET /api/reservations
 
-To learn more about Next.js, take a look at the following resources:
+Returns a list of all reservations.
+Get a specific reservation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+http
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+GET /api/reservations/${id}
 
-## Deploy on Vercel
+Returns the details of a specific reservation identified by its ID.
+Create a new reservation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+http
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+POST /api/reservations
+
+Creates a new reservation. Requires the following parameters in the request body:
+
+    fullName (string): The full name of the person making the reservation.
+    hour (string): The reservation time.
+    persons (string): The number of persons for the reservation.
+    phoneNumber (string): The phone number of the person making the reservation.
+
+Update a reservation
+
+http
+
+PUT /api/reservations/${id}
+
+Updates an existing reservation identified by its ID. Requires the following parameters in the request body:
+
+    fullName (string): The updated full name of the person making the reservation.
+    hour (string): The updated reservation time.
+    persons (string): The updated number of persons for the reservation.
+    phoneNumber (string): The updated phone number of the person making the reservation.
+
+Delete a reservation
+
+http
+
+DELETE /api/reservations/${id}
+
+Deletes a reservation identified by its ID.
+///////
+API KEYS
+GOOGLE_MAPS_API_KEY="AIzaSyCmQincHk8_tGoBVBPjyD5L0W_25-hSBWc"
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="AIzaSyCmQincHk8_tGoBVBPjyD5L0W_25-hSBWc"
