@@ -253,17 +253,11 @@ const Home = () => {
   };
 
   const handleInfoWindowClick = (placeId) => {
-    // Redirect to the restaurant page using Next.js router or window.location
-    // Example using Next.js router:
-    // router.push(`/restaurants/${placeId}`);
-
-    // Example using window.location:
     window.location.href = `/restaurants/${placeId}`;
   };
 
   return (
     <>
-      {/* Add your NavBar component here */}
       <div>
         <GoogleMap
           zoom={defaultZoom}
