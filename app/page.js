@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import NavBar from "../components/NavBar";
 import {
   GoogleMap,
   useLoadScript,
@@ -20,135 +21,163 @@ const restaurantsData = [
     name: "Momosan Wynwood",
     place_id: "ChIJI8aonrm32YgRNQ2cXg9k_fk",
     cuisine: "Japanese",
-    points: 10,
+    rewards: 10,
   },
   {
     name: "Cerveceria La Tropical",
     place_id: "ChIJX772nXW32YgRqL-0pvjFPYY",
     cuisine: "Cuban",
-    points: 6,
+    rewards: 6,
   },
   {
     name: "R House Wynwood",
     place_id: "ChIJqefzYK222YgRNDCblbPPVVU",
     cuisine: "Contemporary Latin",
-    points: 4,
+    rewards: 4,
   },
   {
     name: "La Tiendita Taqueria",
     place_id: "ChIJ95niEx632YgRzw1w0z6Ioyc",
     cuisine: "Mexican",
-    points: 16,
+    rewards: 16,
   },
   {
     name: "STK Steakhouse",
     place_id: "ChIJaXDYCGKz2YgRqb5MFh9gVf0",
     cuisine: "Steakhouse",
-    points: 8,
+    rewards: 8,
   },
   {
     name: "Amara at Paraiso",
     place_id: "ChIJ7-kC5C6y2YgR8kFGy8pYlsM",
     cuisine: "Contemporary American",
-    points: 5,
+    rewards: 5,
   },
   {
     name: "Michael's Genuine",
     place_id: "ChIJfRgILlex2YgRvDRFonWLC4w",
     cuisine: "Contemporary American",
-    points: 7,
+    rewards: 7,
   },
   {
     name: "SUGARCANE raw bar grill",
     place_id: "ChIJMUpdgFOx2YgROjWhMQZMBRk",
     cuisine: "Seafood",
-    points: 13,
+    rewards: 13,
   },
   {
     name: "Sofia - Design District",
     place_id: "ChIJAQBA3lax2YgRB7AIAB_GK_E",
     cuisine: "Modern European",
-    points: 1,
+    rewards: 1,
   },
   {
     name: "Moxies Miami Restaurant",
     place_id: "ChIJ4yC24GK32YgRAEsm4jvWV30",
     cuisine: "American",
-    points: 4,
+    rewards: 4,
   },
   {
     name: "Dolce Italian",
     place_id: "ChIJazj3FJu02YgREmLOfWg0kG8",
     cuisine: "Italian",
-    points: 7,
+    rewards: 7,
   },
   {
     name: "The River Oyster Bar",
     place_id: "ChIJX7AIlpC22YgR-faru5-AMpM",
     cuisine: "Seafood",
-    points: 15,
+    rewards: 15,
   },
   {
     name: "Boulud Sud Miami",
     place_id: "ChIJKc4o84ux2YgRwV9hXejE_6w",
     cuisine: "Mediterranean",
-    points: 13,
+    rewards: 13,
   },
   {
     name: "The Bazaar by José Andrés",
     place_id: "ChIJGV4vnJu02YgRRPZ2RRlUZbQ",
     cuisine: "Spanish",
-    points: 20,
+    rewards: 20,
   },
   {
     name: "Novecento",
     place_id: "ChIJEWuAKIG22YgRPOEUG7BlFsQ",
     cuisine: "Italian",
-    points: 17,
+    rewards: 17,
   },
   {
     name: "The Capital Grille",
     place_id: "ChIJKVAQIZ222YgRxqIAgjmhNz8",
     cuisine: "Steakhouse",
-    points: 13,
+    rewards: 13,
   },
   {
     name: "Motek",
     place_id: "ChIJtQCVt7G32YgR3aHrmstwrrk",
     cuisine: "Mediterranean",
-    points: 15,
+    rewards: 15,
   },
   {
     name: "Crazy About You",
     place_id: "ChIJ56WSjYG22YgRV8CLvPG3z9E",
     cuisine: "American",
-    points: 5,
+    rewards: 5,
   },
   {
     name: "Sexy Fish Miami",
     place_id: "ChIJdfkR4PC32YgRgxEP4swq1oY",
     cuisine: "Asian fusion",
-    points: 16,
+    rewards: 16,
   },
   {
     name: "Dalia",
     place_id: "ChIJa1junq-12YgRqZ1aHTFcywE",
     cuisine: "Mediterranean",
-    points: 10,
+    rewards: 10,
   },
   {
     name: "Tequiztlan",
     place_id: "ChIJtcEOCX602YgRQnCABa-D1gc",
     cuisine: "Mexican",
-    points: 3,
+    rewards: 3,
   },
   {
     name: "Playa Miami",
     place_id: "ChIJFblNZYa02YgR1QY7Ux8Ki7w",
     cuisine: "Mediterranean",
-    points: 2,
+    rewards: 2,
   },
 ];
+
+const defaultCenter = { lat: 25.76, lng: -80.191788 };
+const defaultZoom = 12;
+
+const InfoWindowContent = ({ restaurant }) => (
+  <div className="info-window">
+    <Carousel className="info-window__carousel" showThumbs={false} infiniteLoop>
+      {restaurant.photos?.map((photo, index) => (
+        <div key={index}>
+          <img
+            src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+            alt="Restaurant"
+          />
+        </div>
+      ))}
+    </Carousel>
+    <h2 className="info-window__title">{restaurant.name}</h2>
+    <p className="info-window__info">
+      <span>Cuisine:</span> {restaurant.cuisine}
+    </p>
+    <p className="info-window__info">
+      <span>Price Level:</span> {restaurant.price_level}
+    </p>
+    <p className="info-window__info">
+      <span>Rewards:</span> {restaurant.rewards}%
+    </p>
+  </div>
+);
 
 const Home = () => {
   const [selected, setSelected] = useState(null);
@@ -156,6 +185,7 @@ const Home = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [user, setUser] = useState(null);
+  const infoWindowRef = useRef(null);
 
   useEffect(() => {
     const fetchRestaurantData = async () => {
@@ -215,112 +245,72 @@ const Home = () => {
     setShowSignIn(false);
   };
 
-  return (
-    <div>
-      <GoogleMap
-        zoom={12}
-        center={{ lat: 25.76, lng: -80.191788 }}
-        mapContainerStyle={{
-          width: "100%",
-          height: "100vh",
-        }}
-        options={options}
-      >
-        {restaurants.map((restaurant, i) => (
-          <OverlayView
-            key={restaurant.place_id}
-            position={{
-              lat: restaurant.geometry.location.lat,
-              lng: restaurant.geometry.location.lng,
-            }}
-            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            getPixelPositionOffset={getPixelPositionOffset}
-          >
-            <>
-              <div className="marker-label">{restaurant.name}</div>
-              <Marker
-                position={{
-                  lat: restaurant.geometry.location.lat,
-                  lng: restaurant.geometry.location.lng,
-                }}
-                onClick={() => {
-                  setSelected(restaurant);
-                }}
-                icon={{
-                  url: `data:image/svg+xml;utf-8, 
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35">
-                    <circle cx="17.5" cy="17.5" r="15" fill="%23FF0000"/>
-                    <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="12px" dy=".3em">
-                      ${restaurantsData[i].points}%
-                    </text>
-                  </svg>`,
-                  scaledSize: new window.google.maps.Size(35, 35),
-                }}
-              />
-            </>
-          </OverlayView>
-        ))}
+  const getRewardsByPlaceId = (placeId) => {
+    const restaurant = restaurantsData.find(
+      (restaurant) => restaurant.place_id === placeId
+    );
+    return restaurant ? `${restaurant.rewards}%` : null;
+  };
 
-        {selected && (
-          <Link href={`/restaurants/${selected.place_id}`} passHref>
-            <InfoWindow
+  const handleInfoWindowClick = (placeId) => {
+    // Redirect to the restaurant page using Next.js router or window.location
+    // Example using Next.js router:
+    // router.push(`/restaurants/${placeId}`);
+
+    // Example using window.location:
+    window.location.href = `/restaurants/${placeId}`;
+  };
+
+  return (
+    <>
+      {/* Add your NavBar component here */}
+      <div>
+        <GoogleMap
+          zoom={defaultZoom}
+          center={defaultCenter}
+          mapContainerStyle={{
+            width: "100%",
+            height: "100vh",
+          }}
+          options={options}
+        >
+          {restaurants.map((restaurant) => (
+            <Marker
+              key={restaurant.place_id}
               position={{
-                lat: selected.geometry.location.lat,
-                lng: selected.geometry.location.lng,
+                lat: restaurant.geometry.location.lat,
+                lng: restaurant.geometry.location.lng,
               }}
-              onCloseClick={() => {
-                setSelected(null);
+              label={String(getRewardsByPlaceId(restaurant.place_id))}
+              onClick={() => {
+                setSelected(restaurant);
               }}
             >
-              <div>
-                <h2>{selected.name}</h2>
-                <p>Price level: {selected.price_level}</p>
-                <p>Rating: {selected.rating}</p>
-                <Carousel>
-                  {selected.photos?.map((photo, index) => (
-                    <div key={index}>
-                      <img
-                        src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                        alt="Restaurant"
-                      />
-                    </div>
-                  ))}
-                </Carousel>
-              </div>
-            </InfoWindow>
-          </Link>
-        )}
-
-        {!user && (
-          <>
-            {showSignUp && (
-              <OverlayView
-                position={{ lat: 25.76, lng: -80.191788 }}
-                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                getPixelPositionOffset={getPixelPositionOffset}
-              >
-                <SignUpForm onClose={handleSignUpClose} />
-              </OverlayView>
-            )}
-
-            {showSignIn && (
-              <OverlayView
-                position={{ lat: 25.76, lng: -80.191788 }}
-                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                getPixelPositionOffset={getPixelPositionOffset}
-              >
-                <SignInForm onClose={handleSignInClose} />
-              </OverlayView>
-            )}
-
-            <div className="overlay-buttons">
-              <button onClick={handleSignUpClick}>Sign Up</button>
-              <button onClick={handleSignInClick}>Sign In</button>
-            </div>
-          </>
-        )}
-      </GoogleMap>
-    </div>
+              {selected === restaurant && (
+                <InfoWindow
+                  onCloseClick={() => {
+                    setSelected(null);
+                  }}
+                  onLoad={() => {
+                    const overlay = infoWindowRef.current;
+                    if (overlay) {
+                      overlay.parentNode.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        handleInfoWindowClick(restaurant.place_id);
+                      });
+                    }
+                  }}
+                >
+                  <div ref={infoWindowRef}>
+                    <InfoWindowContent restaurant={restaurant} />
+                  </div>
+                </InfoWindow>
+              )}
+            </Marker>
+          ))}
+        </GoogleMap>
+      </div>
+    </>
   );
 };
 
