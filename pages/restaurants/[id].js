@@ -203,7 +203,6 @@ const RestaurantDetailsPage = () => {
           </div>
         )}
       </div>
-      <NavBar />
     </>
   );
 };

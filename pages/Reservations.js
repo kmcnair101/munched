@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
+import "./Reservations.scss";
 
 const ReservationsPage = () => {
   const [reservations, setReservations] = useState([]);
@@ -108,14 +109,14 @@ const ReservationsPage = () => {
   };
 
   return (
-    <div>
-      <h1>Reservations</h1>
+    <div className="reservations-page">
+      <h1 className="reservations-page__title">Reservations</h1>
       {reservations.length === 0 ? (
-        <p>No reservations found.</p>
+        <p className="reservations-page__empty">No reservations found.</p>
       ) : (
-        <ul>
+        <ul className="reservations-page__list">
           {reservations.map((reservation) => (
-            <li key={reservation.id}>
+            <li key={reservation.id} className="reservations-page__item">
               {editingReservation === reservation.id ? (
                 <>
                   <input
@@ -124,6 +125,7 @@ const ReservationsPage = () => {
                     placeholder="Full Name"
                     value={editedData.fullName}
                     onChange={handleInputChange}
+                    className="reservations-page__input"
                   />
                   <input
                     type="text"
@@ -131,6 +133,7 @@ const ReservationsPage = () => {
                     placeholder="Hour"
                     value={editedData.hour}
                     onChange={handleInputChange}
+                    className="reservations-page__input"
                   />
                   <input
                     type="text"
@@ -138,25 +141,54 @@ const ReservationsPage = () => {
                     placeholder="Persons"
                     value={editedData.persons}
                     onChange={handleInputChange}
+                    className="reservations-page__input"
                   />
-                  <p>Phone Number: {reservation.phoneNumber}</p>
-                  <button onClick={handleSaveEdit}>Save</button>
-                  <button onClick={handleCancelEdit}>Cancel</button>
+                  <p className="reservations-page__phone">
+                    Phone Number: {reservation.phoneNumber}
+                  </p>
+                  <button
+                    onClick={handleSaveEdit}
+                    className="reservations-page__button"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="reservations-page__button"
+                  >
+                    Cancel
+                  </button>
                 </>
               ) : (
                 <>
-                  <p>Reservation ID: {reservation.id}</p>
-                  <p>Full Name: {reservation.fullName}</p>
-                  <p>Hour: {reservation.hour}</p>
-                  <p>Persons: {reservation.persons}</p>
-                  <p>Phone Number: {reservation.phoneNumber}</p>
-                  <p>Rewards: {reservation.rewards}</p>
+                  <p className="reservations-page__id">
+                    Reservation ID: {reservation.id}
+                  </p>
+                  <p className="reservations-page__name">
+                    Full Name: {reservation.fullName}
+                  </p>
+                  <p className="reservations-page__hour">
+                    Hour: {reservation.hour}
+                  </p>
+                  <p className="reservations-page__persons">
+                    Persons: {reservation.persons}
+                  </p>
+                  <p className="reservations-page__phone">
+                    Phone Number: {reservation.phoneNumber}
+                  </p>
+                  <p className="reservations-page__rewards">
+                    Rewards: {reservation.rewards}
+                  </p>
                   <button
                     onClick={() => handleDeleteReservation(reservation.id)}
+                    className="reservations-page__button"
                   >
                     Delete
                   </button>
-                  <button onClick={() => handleEditReservation(reservation)}>
+                  <button
+                    onClick={() => handleEditReservation(reservation)}
+                    className="reservations-page__button"
+                  >
                     Edit
                   </button>
                 </>
